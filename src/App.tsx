@@ -1,17 +1,17 @@
 import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import styled from "@emotion/styled";
 import { initializeAds } from "./utils/ads";
+import Footer from "./components/Footer";
 
 // 지연 로딩을 위한 컴포넌트 분리
 const MonacoEditor = lazy(() => import("@monaco-editor/react"));
 const PrettierFormatter = lazy(() => import("./components/PrettierFormatter"));
 
 const Container = styled.div`
-  max-width: 1600px;
-  margin: 0 auto;
+  max-width: 2400px;
   padding: 2rem;
   display: grid;
-  grid-template-columns: 160px 1fr 160px;
+  grid-template-columns: 250px 1fr 250px;
   gap: 2rem;
 
   @media (max-width: 1200px) {
@@ -21,6 +21,8 @@ const Container = styled.div`
 
 const MainContent = styled.main`
   width: 100%;
+  flex: 1;
+  min-height: 85vh;
 `;
 
 const Sidebar = styled.aside`
@@ -30,8 +32,8 @@ const Sidebar = styled.aside`
 `;
 
 const AdContainer = styled.div`
-  width: 160px;
-  height: 600px;
+  width: 250px;
+  height: 800px;
   background: #f5f5f5;
   display: flex;
   align-items: center;
@@ -90,7 +92,7 @@ const HiddenInput = styled.input`
 `;
 
 const EditorContainer = styled.div`
-  height: 500px;
+  height: 800px;
   border: 1px solid #ccc;
   border-radius: 4px;
 `;
@@ -99,7 +101,7 @@ const LoadingContainer = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 500px;
+  height: 800px;
   background-color: #f5f5f5;
   border-radius: 4px;
 `;
@@ -107,6 +109,12 @@ const LoadingContainer = styled.div`
 const LoadingText = styled.p`
   font-size: 1.2rem;
   color: #666;
+`;
+
+const AppContainer = styled.div`
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 `;
 
 function App() {
@@ -189,110 +197,92 @@ function App() {
   };
 
   return (
-    <Container>
-      <Sidebar>
-        <AdContainer>
-          {/* Left AdSense Ad */}
-          <ins
-            className="adsbygoogle"
-            style={{ display: "block" }}
-            data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
-            data-ad-slot="YOUR_AD_SLOT_ID"
-            data-ad-format="auto"
-            data-full-width-responsive="true"
-          ></ins>
-        </AdContainer>
-      </Sidebar>
-
-      <MainContent>
-        <Header>
-          <Title>코드 포매터</Title>
-          <p>
-            JavaScript, TypeScript, HTML, CSS, JSON 코드를 쉽고 빠르게
-            포매팅하세요
-          </p>
-        </Header>
-        <Controls>
-          <Select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-          >
-            <option value="javascript">JavaScript</option>
-            <option value="typescript">TypeScript</option>
-            <option value="html">HTML</option>
-            <option value="css">CSS</option>
-            <option value="json">JSON</option>
-          </Select>
-          <Select value={theme} onChange={(e) => setTheme(e.target.value)}>
-            <option value="vs-dark">Dark</option>
-            <option value="vs-light">Light</option>
-          </Select>
-          <ButtonGroup>
-            <Button onClick={handleFormat}>Format Code</Button>
-            <Button onClick={() => fileInputRef.current?.click()}>
-              Upload File
-            </Button>
-            <Button onClick={handleDownload}>Download</Button>
-          </ButtonGroup>
-          <HiddenInput
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept=".js,.ts,.html,.css,.json,.txt"
-          />
-        </Controls>
-        <EditorContainer>
-          <Suspense
-            fallback={
-              <LoadingContainer>
-                <LoadingText>에디터 로딩 중...</LoadingText>
-              </LoadingContainer>
-            }
-          >
-            <MonacoEditor
-              height="100%"
-              defaultLanguage="javascript"
-              language={language}
-              theme={theme}
-              value={input}
-              onChange={(value) => setInput(value || "")}
-              options={{
-                minimap: { enabled: false },
-                fontSize: 14,
-                lineNumbers: "on",
-                roundedSelection: false,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-              }}
+    <AppContainer>
+      <Container>
+        <Sidebar>
+          <AdContainer id="sidebar-ad" />
+        </Sidebar>
+        <MainContent>
+          <Header>
+            <Title>코드 포매터</Title>
+            <p>
+              JavaScript, TypeScript, HTML, CSS, JSON 코드를 쉽고 빠르게
+              포매팅하세요
+            </p>
+          </Header>
+          <Controls>
+            <Select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+            >
+              <option value="javascript">JavaScript</option>
+              <option value="typescript">TypeScript</option>
+              <option value="html">HTML</option>
+              <option value="css">CSS</option>
+              <option value="json">JSON</option>
+            </Select>
+            <Select value={theme} onChange={(e) => setTheme(e.target.value)}>
+              <option value="vs-dark">Dark</option>
+              <option value="vs-light">Light</option>
+            </Select>
+            <ButtonGroup>
+              <Button onClick={handleFormat}>Format Code</Button>
+              <Button onClick={() => fileInputRef.current?.click()}>
+                Upload File
+              </Button>
+              <Button onClick={handleDownload}>Download</Button>
+            </ButtonGroup>
+            <HiddenInput
+              id="file-upload"
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".js,.ts,.html,.css,.json,.txt"
             />
-          </Suspense>
-        </EditorContainer>
+          </Controls>
+          <EditorContainer>
+            <Suspense
+              fallback={
+                <LoadingContainer>
+                  <LoadingText>에디터 로딩 중...</LoadingText>
+                </LoadingContainer>
+              }
+            >
+              <MonacoEditor
+                height="100%"
+                defaultLanguage="javascript"
+                language={language}
+                theme={theme}
+                value={input}
+                onChange={(value) => setInput(value || "")}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  lineNumbers: "on",
+                  roundedSelection: false,
+                  scrollBeyondLastLine: false,
+                  automaticLayout: true,
+                }}
+              />
+            </Suspense>
+          </EditorContainer>
 
-        {showFormatter && (
-          <Suspense fallback={null}>
-            <PrettierFormatter
-              code={input}
-              language={language}
-              onFormatted={handleFormatted}
-            />
-          </Suspense>
-        )}
-      </MainContent>
-
-      <Sidebar>
-        <AdContainer>
-          {/* Right AdSense Ad */}
-          <ins
-            className="adsbygoogle"
-            style={{ display: "block" }}
-            data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
-            data-ad-slot="YOUR_AD_SLOT_ID"
-            data-ad-format="auto"
-            data-full-width-responsive="true"
-          ></ins>
-        </AdContainer>
-      </Sidebar>
-    </Container>
+          {showFormatter && (
+            <Suspense fallback={null}>
+              <PrettierFormatter
+                code={input}
+                language={language}
+                onFormatted={handleFormatted}
+              />
+            </Suspense>
+          )}
+        </MainContent>
+        <Sidebar>
+          <AdContainer id="sidebar-ad-2" />
+        </Sidebar>
+      </Container>
+      <Footer />
+    </AppContainer>
   );
 }
 
