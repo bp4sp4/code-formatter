@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, lazy, Suspense } from "react";
 import styled from "@emotion/styled";
 import { initializeAds } from "./utils/ads";
 import Footer from "./components/Footer";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import PrivacyPolicy from "./components/PrivacyPolicy";
 
 // 지연 로딩을 위한 컴포넌트 분리
 const MonacoEditor = lazy(() => import("@monaco-editor/react"));
@@ -117,6 +119,19 @@ const AppContainer = styled.div`
   flex-direction: column;
 `;
 
+const NavLink = styled(Link)`
+  color: #666;
+  text-decoration: none;
+  margin-left: 1rem;
+  &:hover {
+    color: #007bff;
+  }
+`;
+
+const NavLinks = styled.div`
+  margin-top: 1rem;
+`;
+
 function App() {
   const [input, setInput] = useState("");
   const [language, setLanguage] = useState("javascript");
@@ -197,92 +212,109 @@ function App() {
   };
 
   return (
-    <AppContainer>
-      <Container>
-        <Sidebar>
-          <AdContainer id="sidebar-ad" />
-        </Sidebar>
-        <MainContent>
-          <Header>
-            <Title>코드 포매터</Title>
-            <p>
-              JavaScript, TypeScript, HTML, CSS, JSON 코드를 쉽고 빠르게
-              포매팅하세요
-            </p>
-          </Header>
-          <Controls>
-            <Select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-            >
-              <option value="javascript">JavaScript</option>
-              <option value="typescript">TypeScript</option>
-              <option value="html">HTML</option>
-              <option value="css">CSS</option>
-              <option value="json">JSON</option>
-            </Select>
-            <Select value={theme} onChange={(e) => setTheme(e.target.value)}>
-              <option value="vs-dark">Dark</option>
-              <option value="vs-light">Light</option>
-            </Select>
-            <ButtonGroup>
-              <Button onClick={handleFormat}>Format Code</Button>
-              <Button onClick={() => fileInputRef.current?.click()}>
-                Upload File
-              </Button>
-              <Button onClick={handleDownload}>Download</Button>
-            </ButtonGroup>
-            <HiddenInput
-              id="file-upload"
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileUpload}
-              accept=".js,.ts,.html,.css,.json,.txt"
-            />
-          </Controls>
-          <EditorContainer>
-            <Suspense
-              fallback={
-                <LoadingContainer>
-                  <LoadingText>에디터 로딩 중...</LoadingText>
-                </LoadingContainer>
-              }
-            >
-              <MonacoEditor
-                height="100%"
-                defaultLanguage="javascript"
-                language={language}
-                theme={theme}
-                value={input}
-                onChange={(value) => setInput(value || "")}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize: 14,
-                  lineNumbers: "on",
-                  roundedSelection: false,
-                  scrollBeyondLastLine: false,
-                  automaticLayout: true,
-                }}
+    <Router>
+      <AppContainer>
+        <Container>
+          <Sidebar>
+            <AdContainer id="sidebar-ad" />
+          </Sidebar>
+          <MainContent>
+            <Header>
+              <Title>코드 포매터</Title>
+              <p>
+                JavaScript, TypeScript, HTML, CSS, JSON 코드를 쉽고 빠르게
+                포매팅하세요
+              </p>
+              <NavLinks>
+                <NavLink to="/privacy-policy">개인정보 처리방침</NavLink>
+              </NavLinks>
+            </Header>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <>
+                    <Controls>
+                      <Select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                      >
+                        <option value="javascript">JavaScript</option>
+                        <option value="typescript">TypeScript</option>
+                        <option value="html">HTML</option>
+                        <option value="css">CSS</option>
+                        <option value="json">JSON</option>
+                      </Select>
+                      <Select
+                        value={theme}
+                        onChange={(e) => setTheme(e.target.value)}
+                      >
+                        <option value="vs-dark">Dark</option>
+                        <option value="vs-light">Light</option>
+                      </Select>
+                      <ButtonGroup>
+                        <Button onClick={handleFormat}>Format Code</Button>
+                        <Button onClick={() => fileInputRef.current?.click()}>
+                          Upload File
+                        </Button>
+                        <Button onClick={handleDownload}>Download</Button>
+                      </ButtonGroup>
+                      <HiddenInput
+                        id="file-upload"
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        accept=".js,.ts,.html,.css,.json,.txt"
+                      />
+                    </Controls>
+                    <EditorContainer>
+                      <Suspense
+                        fallback={
+                          <LoadingContainer>
+                            <LoadingText>에디터 로딩 중...</LoadingText>
+                          </LoadingContainer>
+                        }
+                      >
+                        <MonacoEditor
+                          height="100%"
+                          defaultLanguage="javascript"
+                          language={language}
+                          theme={theme}
+                          value={input}
+                          onChange={(value) => setInput(value || "")}
+                          options={{
+                            minimap: { enabled: false },
+                            fontSize: 14,
+                            lineNumbers: "on",
+                            roundedSelection: false,
+                            scrollBeyondLastLine: false,
+                            automaticLayout: true,
+                          }}
+                        />
+                      </Suspense>
+                    </EditorContainer>
+                    {showFormatter && (
+                      <Suspense fallback={null}>
+                        <PrettierFormatter
+                          code={input}
+                          language={language}
+                          onFormatted={handleFormatted}
+                        />
+                      </Suspense>
+                    )}
+                  </>
+                }
               />
-            </Suspense>
-          </EditorContainer>
-
-          {showFormatter && (
-            <Suspense fallback={null}>
-              <PrettierFormatter
-                code={input}
-                language={language}
-                onFormatted={handleFormatted}
-              />
-            </Suspense>
-          )}
-        </MainContent>
-        <Sidebar>
-          <AdContainer id="sidebar-ad-2" />
-        </Sidebar>
-      </Container>
-      <Footer />
-    </AppContainer>
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            </Routes>
+          </MainContent>
+          <Sidebar>
+            <AdContainer id="sidebar-ad-2" />
+          </Sidebar>
+        </Container>
+        <Footer />
+      </AppContainer>
+    </Router>
   );
 }
 
