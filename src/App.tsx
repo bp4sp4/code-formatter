@@ -13,12 +13,8 @@ const Container = styled.div`
   max-width: 2400px;
   padding: 2rem;
   display: grid;
-  grid-template-columns: 250px 1fr 250px;
+  grid-template-columns: 1fr;
   gap: 2rem;
-
-  @media (max-width: 1200px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 const MainContent = styled.main`
@@ -215,9 +211,6 @@ function App() {
     <Router>
       <AppContainer>
         <Container>
-          <Sidebar>
-            <AdContainer id="sidebar-ad" />
-          </Sidebar>
           <MainContent>
             <Header>
               <Title>코드 포매터</Title>
@@ -308,9 +301,6 @@ function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             </Routes>
           </MainContent>
-          <Sidebar>
-            <AdContainer id="sidebar-ad-2" />
-          </Sidebar>
         </Container>
         <Footer />
       </AppContainer>
